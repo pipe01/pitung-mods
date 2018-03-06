@@ -1,0 +1,77 @@
+﻿using System.IO;
+using System.Threading;
+using System.Net.Sockets;
+using System;
+using System.Text;
+
+namespace ClientTest
+{
+    public class Client
+    {
+        private TcpClient TClient;
+
+        private NetworkStream _Stream;
+        private NetworkStream Stream => TClient == null ? null : (_Stream ?? (_Stream = TClient?.GetStream()));
+
+        private const int ServerPort = 5757;
+        private const int BufferSize = 1024;
+
+        public delegate void DataReceivedDelegate(string data);
+        public event DataReceivedDelegate DataReceived;
+
+        public void Start()
+        {
+            TClient = new TcpClient("127.0.0.1", ServerPort);
+
+            StartRead();
+        }
+
+        public void Stop()
+        {
+            TClient.Close();
+            TClient = null;
+        }
+
+        public void Send(string str)
+        {
+            if (TClient == null || !TClient.Connected)
+                return;
+
+            byte[] bytes = Encoding.UTF8.GetBytes(str);
+            
+            Stream.Write(bytes, 0, bytes.Length);
+            Stream.Flush();
+        }
+
+        private void StartRead()
+        {
+            if (TClient?.Connected == true)
+                new Thread(ReadStreamThread).Start();
+
+            void ReadStreamThread()
+            {
+                var reader = new StreamReader(Stream, Encoding.UTF8);
+
+                while (TClient.Connected)
+                {
+                    if (TClient.Client.Available > 0)
+                    {
+                        var builder = new StringBuilder();
+                        var buffer = new byte[BufferSize];
+                        int read;
+
+                        do
+                        {
+                            read = Stream.Read(buffer, 0, buffer.Length);
+
+                            builder.Append(Encoding.UTF8.GetString(buffer, 0, read).TrimEnd('\0'));
+                        }
+                        while (TClient.Client.Available > 0);
+
+                        DataReceived?.Invoke(builder.ToString());
+                    }
+                }
+            }
+        }
+    }
+}
