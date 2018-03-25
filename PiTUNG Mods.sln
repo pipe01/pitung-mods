@@ -13,9 +13,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Teleporter", "Teleporter\Te
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArduinoMod", "ArduinoMod\ArduinoMod.csproj", "{5FD60429-BA0D-4851-B6CD-7754ED81EAFF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ArduinoMod Server", "ArduinoMod Server\ArduinoMod Server.csproj", "{A4616865-3235-4BE8-8696-D6C7565719FB}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShareMod", "ShareMod\ShareMod.csproj", "{7A363589-25E9-4C7D-A6D6-52923CA3D415}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClientTest", "ClientTest\ClientTest.csproj", "{405B3CBE-B850-4398-B9F4-4B6DD8167697}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Testing", "Testing\Testing.csproj", "{7A72AD13-FD9A-4334-98AD-AFDBCA0F7A85}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -43,14 +43,14 @@ Global
 		{5FD60429-BA0D-4851-B6CD-7754ED81EAFF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5FD60429-BA0D-4851-B6CD-7754ED81EAFF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5FD60429-BA0D-4851-B6CD-7754ED81EAFF}.Release|Any CPU.Build.0 = Release|Any CPU
-		{A4616865-3235-4BE8-8696-D6C7565719FB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{A4616865-3235-4BE8-8696-D6C7565719FB}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{A4616865-3235-4BE8-8696-D6C7565719FB}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{A4616865-3235-4BE8-8696-D6C7565719FB}.Release|Any CPU.Build.0 = Release|Any CPU
-		{405B3CBE-B850-4398-B9F4-4B6DD8167697}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{405B3CBE-B850-4398-B9F4-4B6DD8167697}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{405B3CBE-B850-4398-B9F4-4B6DD8167697}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{405B3CBE-B850-4398-B9F4-4B6DD8167697}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7A363589-25E9-4C7D-A6D6-52923CA3D415}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7A363589-25E9-4C7D-A6D6-52923CA3D415}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7A363589-25E9-4C7D-A6D6-52923CA3D415}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7A363589-25E9-4C7D-A6D6-52923CA3D415}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7A72AD13-FD9A-4334-98AD-AFDBCA0F7A85}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7A72AD13-FD9A-4334-98AD-AFDBCA0F7A85}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7A72AD13-FD9A-4334-98AD-AFDBCA0F7A85}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7A72AD13-FD9A-4334-98AD-AFDBCA0F7A85}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -1,4 +1,6 @@
-﻿using System.Threading;
+﻿using System.Net;
+using NetSockets;
+using System.Threading;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,22 +13,36 @@ namespace ArduinoMod_Server
     {
         static void Main(string[] args) => new Program().Main();
 
-        private Server Server;
-        private ManualResetEventSlim ExitEvent = new ManualResetEventSlim();
+        NetObjectServer objServer = new NetObjectServer();
+        NetStringServer server = new NetStringServer();
 
         public void Main()
         {
-            Console.WriteLine("Starting server...");
+            server.Start(IPAddress.Loopback, 5757);
 
-            Server = new Server();
-            Server.DebugLog += (_, e) => Console.WriteLine("-> " + e);
-            Server.Start();
+            server.OnClientConnected += Server_OnClientConnected;
+            server.OnClientRejected += Server_OnClientRejected;
+            server.OnReceived += Server_OnReceived;
+            
+            new ManualResetEventSlim().Wait();
+        }
 
-            Console.WriteLine("Listening");
+        private void Server_OnClientRejected(object sender, NetClientRejectedEventArgs e)
+        {
+            Console.WriteLine("Rejected");
+        }
 
-            ExitEvent.Wait();
+        private void Server_OnReceived(object sender, NetClientReceivedEventArgs<string> e)
+        {
+            Console.WriteLine("< " + e.Data);
+        }
 
-            Server.Stop(false);
+        private void Server_OnClientConnected(object sender, NetClientConnectedEventArgs e)
+        {
+            e.Reject = false;
+            Console.WriteLine("New client: " + e.Guid);
+
+            server.DispatchTo(e.Guid, "hola que tal");
         }
     }
 }
