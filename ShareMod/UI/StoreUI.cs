@@ -1,5 +1,6 @@
 ﻿using ICSharpCode.SharpZipLib.Zip;
 using PiTung;
+using PiTung.Console;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -27,8 +28,9 @@ namespace ShareMod.UI
         private IDictionary<WorldModel, WorldState> WorldStates = new Dictionary<WorldModel, WorldState>();
         private GUIStyle EntryStyle, EntryHoverStyle, WorldInfoStyle;
         private int CurrentPage = 0;
-
+        
         private WorldModel[] Worlds => LastResponse.Items;
+
 
         private string SavesPath => Application.persistentDataPath + "/saves/";
 
@@ -40,15 +42,8 @@ namespace ShareMod.UI
         
         public override void Init()
         {
-            base.Init();
-
             Refresh();
-
-            foreach (var item in Worlds)
-            {
-                Remote.User.GetByID(item.AuthorID);
-            }
-
+            
             EntryStyle = new GUIStyle
             {
                 hover = new GUIStyleState
@@ -74,6 +69,8 @@ namespace ShareMod.UI
                 },
                 padding = new RectOffset(5, 5, 1, 1)
             };
+
+            base.Init();
         }
 
         public override void Draw()
@@ -85,6 +82,11 @@ namespace ShareMod.UI
             {
                 Visible = !Visible;
                 ShareMod.PlayButtonSound();
+
+                if (Visible)
+                    RunMainMenu.Instance.CameraMovementDirector.Pause();
+                else
+                    RunMainMenu.Instance.CameraMovementDirector.Resume();
             }
 
             if (Visible && Input.GetKeyDown(KeyCode.Escape))
@@ -103,63 +105,77 @@ namespace ShareMod.UI
             {
                 GUI.DragWindow(new Rect(0, 0, WorldsWindowRect.width, 25));
 
-                if (LastResponse == null)
-                    return;
-
                 BeginVertical();
                 {
-                    ScrollPos = BeginScrollView(ScrollPos, false, true, MaxWidth(WorldsWindowRect.width));
+                    ScrollPos = BeginScrollView(ScrollPos, false, true, MaxWidth(WorldsWindowRect.width), MinHeight(WorldsWindowRect.height - 60));
                     {
-                        foreach (var item in Worlds)
+                        if (LastResponse != null)
                         {
-                            DrawWorldEntry(item);
-                        }
+                            foreach (var item in Worlds)
+                            {
+                                DrawWorldEntry(item);
+                            }
+                        }                        
                     }
                     EndScrollView();
-
+                    
                     BeginHorizontal();
                     {
-                        Label($"<size=20>Page {LastResponse.Page}</size>");
-
-                        FlexibleSpace();
-                        BeginVertical();
+                        if (LastResponse == null)
                         {
-                            FlexibleSpace();
-
-                            GUI.enabled = LastResponse.Page != 0;
-                            if (Button("Previous page", Height(30), Width(95)))
-                            {
-                                ShareMod.PlayButtonSound();
-
-                                CurrentPage--;
-                                Refresh();
-                            }
-
-                            FlexibleSpace();
+                            Label("<size=20>Loading...</size>");
                         }
-                        EndVertical();
-
-                        BeginVertical();
+                        else
                         {
-                            FlexibleSpace();
-                            GUI.enabled = !LastResponse.LastPage;
-                            if (Button("Next page", Height(30), Width(95)))
-                            {
-                                ShareMod.PlayButtonSound();
-
-                                CurrentPage++;
-                                Refresh();
-                            }
-                            GUI.enabled = true;
-
-                            FlexibleSpace();
+                            Label($"<size=20>Page {LastResponse.Page}</size>");
                         }
-                        EndVertical();
+
+                        DrawPageControls();
                     }
                     EndHorizontal();
                 }
                 EndVertical();
             }
+        }
+
+        private void DrawPageControls(bool enabled = true)
+        {
+            FlexibleSpace();
+
+            BeginVertical();
+            {
+                FlexibleSpace();
+
+                GUI.enabled = !enabled ? false : (LastResponse?.Page ?? 0) != 0;
+                if (Button("Previous page", Height(30), Width(95)))
+                {
+                    ShareMod.PlayButtonSound();
+
+                    CurrentPage--;
+                    Refresh();
+                }
+
+                FlexibleSpace();
+            }
+            EndVertical();
+
+            BeginVertical();
+            {
+                FlexibleSpace();
+
+                GUI.enabled = !enabled ? false : (!LastResponse?.LastPage ?? false);
+                if (Button("Next page", Height(30), Width(95)))
+                {
+                    ShareMod.PlayButtonSound();
+
+                    CurrentPage++;
+                    Refresh();
+                }
+                GUI.enabled = enabled;
+
+                FlexibleSpace();
+            }
+            EndVertical();
         }
 
         private void DrawWorldEntry(WorldModel world)
@@ -215,22 +231,28 @@ namespace ShareMod.UI
                 CurrentPage = 0;
 
             LastResponse = null;
-            LastResponse = Remote.GetWorlds(CurrentPage);
 
-            ScrollPos = Vector2.zero;
-
-            foreach (var item in Worlds)
+            new Thread(() =>
             {
-                if (Directory.Exists(SavesPath + item.Title))
-                {
-                    WorldStates[item] = WorldState.Existing;
-                }
-                else
-                {
-                    WorldStates[item] = WorldState.None;
-                }
-            }
+                IGConsole.Log("loaded");
+                LastResponse = Remote.GetWorlds(CurrentPage);
 
+                ScrollPos = Vector2.zero;
+
+                foreach (var item in Worlds)
+                {
+                    if (Directory.Exists(SavesPath + item.Title))
+                    {
+                        WorldStates[item] = WorldState.Existing;
+                    }
+                    else
+                    {
+                        WorldStates[item] = WorldState.None;
+                    }
+
+                    Remote.User.GetByID(item.AuthorID);
+                }
+            }).Start();
         }
 
         private void DownloadWorld(WorldModel world)

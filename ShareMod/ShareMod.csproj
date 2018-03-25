@@ -90,6 +90,7 @@
     <Reference Include="UnityEngine.CoreModule">
       <HintPath>..\..\TUNG Console\PiTung Bootstrap\lib\UnityEngine.CoreModule.dll</HintPath>
     </Reference>
+    <Reference Include="UnityEngine.DirectorModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null" />
     <Reference Include="UnityEngine.IMGUIModule">
       <HintPath>..\..\TUNG Console\PiTung Bootstrap\lib\UnityEngine.IMGUIModule.dll</HintPath>
     </Reference>

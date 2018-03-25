@@ -24,6 +24,9 @@ namespace ShareMod
 
         public const string Endpoint = "https://www.pipe0481.heliohost.org/pitung/share/v1";
 
+        private static WebClient Client = new WebClient();
+    
+
         public RUser User { get; } = new RUser();
         public class RUser
         {
@@ -175,32 +178,22 @@ namespace ShareMod
 
         public void DownloadWorld(int id, Action<byte[]> done)
         {
-            var req = BuildRequest("/world", HttpMethod.Get, new Dictionary<string, object>
-            {
-                ["id"] = id,
-                ["d"] = 1
-            });
-
-            var yie = req.SendWebRequest();
-
             new Thread(() =>
             {
-                while (!yie.isDone)
+                var req = MakeRequest("/world", HttpMethod.Get, new Dictionary<string, object>
                 {
-                    Thread.Sleep(50);
-                }
-
-                byte[] down = req.downloadHandler.data;
-
-
-                if ((char)down[0] == '{')
+                    ["id"] = id,
+                    ["d"] = 1
+                });
+                
+                if ((char)req[0] == '{')
                 {
                     Console.WriteLine("WORLD NOT FOUND");
                     done(null);
                 }
                 else
                 {
-                    done(req.downloadHandler.data);
+                    done(req);
                 }
             }).Start();
         }
@@ -235,56 +228,44 @@ namespace ShareMod
         }
         
         #region HTTP Stuff
-        private static UnityWebRequest BuildRequest(string api, HttpMethod method, Dictionary<string, object> data = null)
-        {
-            if (data != null)
-                api += "?" + string.Join("&", data.Select(o => $"{o.Key}={UnityWebRequest.EscapeURL(o.Value.ToString())}").ToArray());
-
-            UnityWebRequest req = null;
-
-            switch (method)
-            {
-                case HttpMethod.Post:
-                    req = UnityWebRequest.Post(Endpoint + api, "");
-                    break;
-                case HttpMethod.Get:
-                    req = UnityWebRequest.Get(Endpoint + api);
-                    break;
-            }
-
-            return req;
-        }
-
-        private static byte[] MakeBinaryRequest(string api, HttpMethod method, Dictionary<string, object> data = null)
-        {
-            var req = BuildRequest(api, method, data);
-
-            ManualResetEventSlim mre = new ManualResetEventSlim();
-
-            var yie = req.SendWebRequest();
-
-            new Thread(() =>
-            {
-                while (!yie.isDone)
-                {
-                    Thread.Sleep(50);
-                }
-
-                mre.Set();
-            }).Start();
-
-            mre.Wait();
-
-            return req.downloadHandler.data;
-        }
-
         private static T MakeRequest<T>(string api, HttpMethod method, Dictionary<string, object> data = null) where T : Model
         {
-            byte[] bin = MakeBinaryRequest(api, method, data);
+            byte[] bin = MakeRequest(api, method, data);
 
             string str = Encoding.UTF8.GetString(bin);
-            
+
             return SimpleJson.DeserializeObject<T>(str, new MySerializationStrategy());
+        }
+
+        private static byte[] MakeRequest(string api, HttpMethod method, Dictionary<string, object> data = null)
+        {
+            NameValueCollection form = new NameValueCollection();
+
+            if (data != null)
+            {
+                foreach (var item in data)
+                {
+                    form.Add(item.Key, item.Value.ToString());
+                }
+            }
+
+            ServicePointManager.ServerCertificateValidationCallback += (_, __, ___, ____) => true;
+            ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls;
+            
+            Client.QueryString = form;
+
+            byte[] response;
+
+            if (method == HttpMethod.Get)
+            {
+                response = Client.DownloadData(Endpoint + api);
+            }
+            else
+            {
+                response = Client.UploadData(Endpoint + api, "GET", new byte[0]);
+            }
+
+            return response;
         }
 
         private class MySerializationStrategy : PocoJsonSerializerStrategy
