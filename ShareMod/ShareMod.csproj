@@ -117,6 +117,7 @@
     <Compile Include="Remote.cs" />
     <Compile Include="ShareMod.cs" />
     <Compile Include="SimpleJSON.cs" />
+    <Compile Include="UI\AccountUI.cs" />
     <Compile Include="UI\LoginUI.cs" />
     <Compile Include="UI\MessageBox.cs" />
     <Compile Include="UI\StoreUI.cs" />

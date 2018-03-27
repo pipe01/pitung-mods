@@ -16,7 +16,7 @@ namespace ShareMod.UI
 
         public override void Draw()
         {
-            if (!(RunMainMenu.Instance.LoadGameCanvas?.enabled ?? false))
+            if (!(RunMainMenu.Instance.LoadGameCanvas?.enabled ?? false) || !Remote.User.IsLoggedIn)
                 return;
 
             GUI.enabled = LoadGameMenu.Instance.SelectedSaveFile != null;
@@ -36,7 +36,11 @@ namespace ShareMod.UI
 
             if (result.Error == null)
             {
-                MessageBox.Show("Your world has been uploaded!", "Success", o => IGConsole.Log(o));
+                MessageBox.Show("Your world has been uploaded!", "Success");
+            }
+            else
+            {
+                MessageBox.Show("Error while uploading world: " + result.Error, "Error");
             }
         }
     }

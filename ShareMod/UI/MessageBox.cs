@@ -11,6 +11,7 @@ namespace ShareMod.UI
         private string Title;
         private string[] Options;
         private int Result;
+        private GUIStyle Style;
 
         private event EventHandler ResultSet;
 
@@ -35,6 +36,15 @@ namespace ShareMod.UI
             this.Text = text;
             this.Title = title;
             this.Options = options;
+
+            this.Style = new GUIStyle
+            {
+                alignment = TextAnchor.MiddleCenter,
+                normal = new GUIStyleState
+                {
+                    textColor = Color.white
+                }
+            };
         }
 
         public void Draw()
@@ -53,10 +63,7 @@ namespace ShareMod.UI
                 {
                     FlexibleSpace();
 
-                    Label(this.Text, new GUIStyle
-                    {
-                        alignment = TextAnchor.MiddleCenter
-                    });
+                    Label(this.Text, Style);
 
                     FlexibleSpace();
 
@@ -69,6 +76,8 @@ namespace ShareMod.UI
                         {
                             if (Button(item, Width(90), Height(30)))
                             {
+                                ShareMod.PlayButtonSound();
+
                                 this.Result = i;
                                 ResultSet?.Invoke(this, null);
                             }

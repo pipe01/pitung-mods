@@ -21,15 +21,28 @@ namespace ShareMod.UI
             Existing
         }
 
+        private enum State
+        {
+            Idle,
+            Loading,
+            Error
+        }
+
+        public override bool RequireMainMenu => true;
+
         private Rect WorldsWindowRect = new Rect(0, 0, 500, 500);
         private Vector2 ScrollPos = new Vector2();
         private WorldModel Selected = null;
         private WorldsResponseModel LastResponse = null;
         private IDictionary<WorldModel, WorldState> WorldStates = new Dictionary<WorldModel, WorldState>();
-        private GUIStyle EntryStyle, EntryHoverStyle, WorldInfoStyle;
+        private IDictionary<WorldModel, string> WorldTimes = new Dictionary<WorldModel, string>();
+        private GUIStyle EntryStyle, EntryHoverStyle, WorldInfoStyle, WorldIDStyle;
         private int CurrentPage = 0;
-        
-        private WorldModel[] Worlds => LastResponse.Items;
+        private float LastTimeUpdate = 0;
+        private IDictionary<int, WorldsResponseModel> PageCache = new Dictionary<int, WorldsResponseModel>();
+        private State CurrentState = State.Idle;
+
+        private WorldModel[] Worlds => LastResponse?.Items;
 
 
         private string SavesPath => Application.persistentDataPath + "/saves/";
@@ -39,11 +52,11 @@ namespace ShareMod.UI
             WorldsWindowRect.x = Screen.width / 2 - WorldsWindowRect.width / 2;
             WorldsWindowRect.y = Screen.height / 2 - WorldsWindowRect.height / 2;
         }
-        
+
         public override void Init()
         {
             Refresh();
-            
+
             EntryStyle = new GUIStyle
             {
                 hover = new GUIStyleState
@@ -61,7 +74,7 @@ namespace ShareMod.UI
                 hover = new GUIStyleState()
             };
 
-            WorldInfoStyle = new GUIStyle()
+            WorldInfoStyle = new GUIStyle
             {
                 normal = new GUIStyleState
                 {
@@ -70,28 +83,32 @@ namespace ShareMod.UI
                 padding = new RectOffset(5, 5, 1, 1)
             };
 
+            WorldIDStyle = new GUIStyle(WorldInfoStyle)
+            {
+                alignment = TextAnchor.MiddleRight
+            };
+
             base.Init();
         }
 
         public override void Draw()
         {
-            if (!IsInitialized || !(RunMainMenu.Instance.MainMenuCanvas?.enabled ?? false))
+            if (!IsInitialized || !Remote.User.IsLoggedIn)
                 return;
 
-            if (GUI.Button(new Rect(2, 67, 150, 25), "Browse market"))
+            //Update world "created at" times every second
+            if (Time.time - LastTimeUpdate > 1)
+            {
+                LastTimeUpdate = Time.time;
+                UpdateWorldTimes();
+            }
+
+            if (GUI.Button(new Rect(2, 67, 150, 25), "Browse market") || (Visible && Input.GetKeyDown(KeyCode.Escape)))
             {
                 Visible = !Visible;
                 ShareMod.PlayButtonSound();
 
-                if (Visible)
-                    RunMainMenu.Instance.CameraMovementDirector.Pause();
-                else
-                    RunMainMenu.Instance.CameraMovementDirector.Resume();
-            }
-
-            if (Visible && Input.GetKeyDown(KeyCode.Escape))
-            {
-                Visible = false;
+                SetMainMenuPlaying(!Visible);
             }
 
             if (Visible)
@@ -100,47 +117,69 @@ namespace ShareMod.UI
                 WorldsWindowRect = GUI.Window(1235, WorldsWindowRect, DrawWindow, "World market");
                 GUI.BringWindowToFront(1235);
             }
+        }
 
-            void DrawWindow(int id)
+        private void DrawWindow(int id)
+        {
+            GUI.DragWindow(new Rect(0, 0, WorldsWindowRect.width, 25));
+
+            BeginVertical();
             {
-                GUI.DragWindow(new Rect(0, 0, WorldsWindowRect.width, 25));
-
-                BeginVertical();
+                ScrollPos = BeginScrollView(ScrollPos, false, true, Width(WorldsWindowRect.width - 13), MinHeight(WorldsWindowRect.height - 60));
                 {
-                    ScrollPos = BeginScrollView(ScrollPos, false, true, MaxWidth(WorldsWindowRect.width), MinHeight(WorldsWindowRect.height - 60));
+                    if (LastResponse != null)
                     {
-                        if (LastResponse != null)
+                        foreach (var item in Worlds)
                         {
-                            foreach (var item in Worlds)
-                            {
-                                DrawWorldEntry(item);
-                            }
-                        }                        
-                    }
-                    EndScrollView();
-                    
-                    BeginHorizontal();
-                    {
-                        if (LastResponse == null)
-                        {
-                            Label("<size=20>Loading...</size>");
+                            DrawWorldEntry(item);
                         }
-                        else
-                        {
-                            Label($"<size=20>Page {LastResponse.Page}</size>");
-                        }
-
-                        DrawPageControls();
                     }
-                    EndHorizontal();
                 }
-                EndVertical();
+                EndScrollView();
+
+                BeginHorizontal();
+                {
+                    if (CurrentState == State.Loading)
+                    {
+                        Label("<size=20>Loading...</size>");
+                    }
+                    else if (CurrentState == State.Error)
+                    {
+                        Label("<size=20>Couldn't contact server</size>");
+                    }
+                    else
+                    {
+                        Label($"<size=20>Page {LastResponse.Page + 1}</size>");
+                    }
+
+                    if (CurrentState == State.Idle)
+                        DrawPageControls();
+                }
+                EndHorizontal();
             }
+            EndVertical();
         }
 
         private void DrawPageControls(bool enabled = true)
         {
             FlexibleSpace();
+
+            BeginVertical();
+            {
+                FlexibleSpace();
+
+                if (Button("Refresh", Height(30), Width(95)))
+                {
+                    ShareMod.PlayButtonSound();
+
+                    Refresh(clearCache: true);
+                }
+
+                FlexibleSpace();
+            }
+            EndVertical();
+
+            Space(8);
 
             BeginVertical();
             {
@@ -181,40 +220,63 @@ namespace ShareMod.UI
         private void DrawWorldEntry(WorldModel world)
         {
             string authorName = Remote.User.GetByID(world.AuthorID)?.Username;
-            
-            BeginHorizontal(world == Selected ? EntryHoverStyle : EntryStyle);
 
-            Box("image", Width(60), Height(60));
-
-            BeginVertical();
-            Label($"<size=16>{world.Title}</size>");
-            
-            Label("by " + authorName, WorldInfoStyle);
-            Label("ID: " + world.ID, WorldInfoStyle);
-            EndVertical();
-
-            //--Download button--
-            var state = WorldStates[world];
-
-            string btnText =
-                state == WorldState.Downloading ? "Downloading..." :
-                state == WorldState.Existing ? "Installed" : "Download";
-
-            GUI.enabled = state != WorldState.Downloading && state != WorldState.Existing;
-            FlexibleSpace();
-            BeginVertical();
-            FlexibleSpace();
-            if (Button(btnText, Height(30), Width(95)))
+            BeginHorizontal(world == Selected ? EntryHoverStyle : EntryStyle, Height(68));
             {
-                ShareMod.PlayButtonSound();
-                Selected = world;
-                DownloadWorld(world);
-            }
-            FlexibleSpace();
-            EndVertical();
-            GUI.enabled = true;
-            //------------
+                Box("", Width(60), Height(60));
 
+                BeginVertical();
+                {
+                    Label($"<size=16>{world.Title}</size>");
+
+                    Label("by " + authorName, WorldInfoStyle);
+                    Label($"{world.Downloads} downloads", WorldInfoStyle);
+                }
+                EndVertical();
+
+
+                //Try to get the world state from WorldStates. If it doesn't exist, add it.
+                if (!WorldStates.TryGetValue(world, out WorldState state))
+                    state = WorldStates[world] = WorldState.None;
+
+                string btnText =
+                    state == WorldState.Downloading ? "Downloading..." :
+                    state == WorldState.Existing ? "Installed" : "Download";
+                
+                GUI.enabled = state != WorldState.Downloading && state != WorldState.Existing;
+                FlexibleSpace();
+                BeginVertical();
+                {
+                    //--Download button--
+                    FlexibleSpace();
+
+                    BeginHorizontal();
+                    {
+                        FlexibleSpace();
+                        if (Button(btnText, Height(30), Width(95)))
+                        {
+                            ShareMod.PlayButtonSound();
+                            Selected = world;
+                            DownloadWorld(world);
+                        }
+                    }
+                    EndHorizontal();
+
+                    Space(5);
+                    //------------
+
+                    GUI.enabled = false;
+
+                    if (!WorldTimes.TryGetValue(world, out var time))
+                        WorldTimes[world] = time = "";
+
+                    Label(time, WorldIDStyle);
+                    FlexibleSpace();
+
+                    GUI.enabled = true;
+                }
+                EndVertical();
+            }
             EndHorizontal();
 
             Rect horRect = GUILayoutUtility.GetLastRect();
@@ -225,17 +287,99 @@ namespace ShareMod.UI
             }
         }
 
-        public void Refresh(bool resetPage = false)
+        private void UpdateWorldTimes()
         {
+            WorldTimes?.Clear();
+            
+            if (Worlds == null)
+            {
+                return;
+            }
+
+            int time = (int)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds;
+            foreach (var item in Worlds)
+            {
+                WorldTimes[item] = GetTimeString(item.CreatedAt, time);
+            }
+        }
+
+        private string GetTimeString(int timestamp, int currentTime)
+        {
+            int seconds = currentTime - timestamp;
+            float minutes = seconds / 60f;
+            float hours = minutes / 60;
+            float days = hours / 24;
+            float weeks = days / 7;
+
+            float value;
+            string unit = "";
+
+            if ((int)weeks > 0)
+            {
+                value = weeks;
+                unit = "weeek";
+            }
+            else if ((int)days > 0)
+            {
+                value = days;
+                unit = "day";
+            }
+            else if ((int)hours > 0)
+            {
+                value = hours;
+                unit = "hour";
+            }
+            else if ((int)minutes > 0)
+            {
+                value = minutes;
+                unit = "minute";
+            }
+            else
+            {
+                value = seconds;
+                unit = "second";
+            }
+
+            if ((int)value != 1)
+            {
+                unit += "s";
+            }
+
+            return $"{(int)value} {unit} ago";
+        }
+
+        public void Refresh(bool resetPage = false, bool clearCache = false)
+        {
+            CurrentState = State.Loading;
+
             if (resetPage)
                 CurrentPage = 0;
+
+            if (clearCache)
+                PageCache.Clear();
 
             LastResponse = null;
 
             new Thread(() =>
             {
-                IGConsole.Log("loaded");
-                LastResponse = Remote.GetWorlds(CurrentPage);
+                if (!PageCache.ContainsKey(CurrentPage))
+                {
+                    var resp = Remote.GetWorlds(CurrentPage);
+                    
+                    if (resp != null)
+                        PageCache[CurrentPage] = resp;
+                }
+
+                if (!PageCache.TryGetValue(CurrentPage, out LastResponse) || LastResponse?.Status != "ok")
+                {
+                    CurrentState = State.Error;
+
+                    return;
+                }
+                else
+                {
+                    CurrentState = State.Idle;
+                }
 
                 ScrollPos = Vector2.zero;
 
@@ -252,6 +396,8 @@ namespace ShareMod.UI
 
                     Remote.User.GetByID(item.AuthorID);
                 }
+
+                UpdateWorldTimes();
             }).Start();
         }
 
@@ -271,7 +417,7 @@ namespace ShareMod.UI
         private void SaveWorld(WorldModel world, byte[] data)
         {
             MemoryStream inStream = new MemoryStream(data);
-            
+
             Zipper.ExtractZipFile(inStream, SavesPath + world.Title);
         }
     }

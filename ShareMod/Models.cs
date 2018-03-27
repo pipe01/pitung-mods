@@ -37,7 +37,9 @@ namespace ShareMod
 
         public string Title { get; set; }
 
-        public long CreatedAt { get; set; }
+        public int CreatedAt { get; set; }
+
+        public int Downloads { get; set; }
 
         public string Hash { get; set; }
     }

@@ -1,6 +1,8 @@
-﻿using System.Threading;
+﻿using System;
+using System.Threading;
 using System.Web.UI.WebControls;
 using UnityEngine;
+using static UnityEngine.GUILayout;
 
 namespace ShareMod.UI
 {
@@ -10,11 +12,14 @@ namespace ShareMod.UI
         {
             Idle,
             LoggingIn,
-            LoggingOut
+            LoggingOut,
+            Registering
         }
 
-        private Rect LoginWindowRect = new Rect(100, 100, 200, 100);
-        private string Username = "", Password = "";
+        public override bool RequireMainMenu => true;
+
+        private Rect LoginWindowRect = new Rect(100, 100, 200, 124);
+        private string Username = "", Password = "", RegisterResult = "";
         private bool ShallFocusUsername;
         private EState State;
 
@@ -24,10 +29,8 @@ namespace ShareMod.UI
         
         public override void Draw()
         {
-            if (!(RunMainMenu.Instance.MainMenuCanvas?.enabled ?? false))
-            {
+            if (Remote.User.IsLoggedIn)
                 return;
-            }
 
             string text = Remote.User.IsLoggedIn ? "Log out" : "Log in to ShareMod";
 
@@ -44,6 +47,8 @@ namespace ShareMod.UI
                     if (State != EState.LoggingIn)
                     {
                         Visible = !Visible;
+
+                        SetMainMenuPlaying(!Visible);
 
                         if (Visible)
                         {
@@ -71,67 +76,90 @@ namespace ShareMod.UI
 
             void MyWindow(int id)
             {
-                GUILayout.BeginVertical();
-
-                GUI.enabled = State != EState.LoggingIn;
-
-                GUILayout.BeginHorizontal();
-                GUILayout.Label("Username:");
-                GUI.SetNextControlName("txtUsername");
-                Username = GUILayout.TextField(Username, 40, GUILayout.MaxWidth(LoginWindowRect.width / 2));
-                GUILayout.EndHorizontal();
-
-                GUILayout.BeginHorizontal();
-                GUILayout.Label("Password:");
-                GUI.SetNextControlName("txtPassword");
-                Password = GUILayout.PasswordField(Password, '*', 40, GUILayout.MaxWidth(LoginWindowRect.width / 2));
-                GUILayout.EndHorizontal();
-
-                GUI.enabled = true;
-
-                if (ShallFocusUsername)
+                BeginVertical();
                 {
-                    ShallFocusUsername = false;
+                    GUI.enabled = State != EState.LoggingIn && State != EState.Registering;
 
-                    GUI.FocusControl("txtUsername");
-                }
-
-                if (State != EState.LoggingIn)
-                {
-                    bool login = false;
-
-                    if (GUILayout.Button("Login", GUILayout.MaxWidth(LoginWindowRect.width)))
+                    BeginHorizontal();
                     {
-                        ShareMod.PlayButtonSound();
-                        login = true;
+                        GUILayout.Label("Username:");
+                        GUI.SetNextControlName("txtUsername");
+                        Username = TextField(Username, 40, MaxWidth(LoginWindowRect.width / 2));
                     }
+                    EndHorizontal();
+
+                    BeginHorizontal();
+                    {
+                        GUILayout.Label("Password:");
+                        GUI.SetNextControlName("txtPassword");
+                        Password = PasswordField(Password, '*', 40, MaxWidth(LoginWindowRect.width / 2));
+                    }
+                    EndHorizontal();
+
+                    GUI.enabled = true;
+
+                    if (ShallFocusUsername)
+                    {
+                        ShallFocusUsername = false;
+
+                        GUI.FocusControl("txtUsername");
+                    }
+
                     
-                    string focused = GUI.GetNameOfFocusedControl();
-                    if (Event.current.isKey && Event.current.keyCode == KeyCode.Return && (focused == "txtUsername" || focused == "txtPassword"))
+                    if (State == EState.LoggingIn)
                     {
-                        login = true;
-                    }
-
-                    if (login)
-                    {
-                        Login(Username, Password);
-
-                        Username = "";
-                        Password = "";
-                    }
-                }
-                else
-                {
-                    GUILayout.Label("Logging in...", new GUIStyle
-                    {
-                        normal = new GUIStyleState
+                        GUILayout.Label("Logging in...", new GUIStyle
                         {
-                            textColor = new Color(0, 200, 0)
-                        }
-                    });
-                }
+                            normal = new GUIStyleState
+                            {
+                                textColor = new Color(0, 200, 0)
+                            }
+                        });
+                    }
+                    else if (State == EState.Registering)
+                    {
+                        GUILayout.Label("Registering...", new GUIStyle
+                        {
+                            normal = new GUIStyleState
+                            {
+                                textColor = new Color(0, 200, 0)
+                            }
+                        });
+                    }
+                    else
+                    {
+                        bool login = false;
 
-                GUILayout.EndVertical();
+                        if (Button("Login", MaxWidth(LoginWindowRect.width)))
+                        {
+                            ShareMod.PlayButtonSound();
+                            login = true;
+                        }
+                        else if (Button("Register", MaxWidth(LoginWindowRect.width)))
+                        {
+                            ShareMod.PlayButtonSound();
+
+                            Register(Username, Password);
+
+                            Username = "";
+                            Password = "";
+                        }
+
+                        string focused = GUI.GetNameOfFocusedControl();
+                        if (Event.current.isKey && Event.current.keyCode == KeyCode.Return && (focused == "txtUsername" || focused == "txtPassword"))
+                        {
+                            login = true;
+                        }
+
+                        if (login)
+                        {
+                            Login(Username, Password);
+
+                            Password = "";
+                        }
+                    }
+                }
+                EndVertical();
 
                 GUI.DragWindow();
             }
@@ -152,11 +180,44 @@ namespace ShareMod.UI
             new Thread(() =>
             {
                 State = EState.LoggingIn;
-                if (Remote.User.Login(username, password))
+
+                string result = Remote.User.Login(username, password);
+
+                if (result == "ok")
                 {
                     Visible = false;
                 }
+                else
+                {
+                    result = char.ToUpper(result[0]) + result.Substring(1) + ".";
+
+                    MessageBox.Show(result, "Error");
+                }
+
                 State = EState.Idle;
+            }).Start();
+        }
+
+        private void Register(string username, string password)
+        {
+            new Thread(() =>
+            {
+                State = EState.Registering;
+
+                RegisterResult = Remote.User.Register(username, password);
+                Console.WriteLine(RegisterResult);
+
+                if (RegisterResult == "ok")
+                {
+                    Login(username, password);
+                }
+                else
+                {
+                    RegisterResult = char.ToUpper(RegisterResult[0]) + RegisterResult.Substring(1) + ".";
+
+                    MessageBox.Show(RegisterResult, "Error", o => State = EState.Idle);
+                    Username = username;
+                }
             }).Start();
         }
     }

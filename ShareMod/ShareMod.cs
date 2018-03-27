@@ -53,10 +53,16 @@ namespace ShareMod
         public override void AfterPatch()
         {
             Remote.User.TryLoginFromFile();
+
+            AddUI<LoginUI>();
+            AddUI<AccountUI>();
+            AddUI<StoreUI>();
+            AddUI<UploadWorldUI>();
             
-            Screens.Add(new LoginUI(Remote));
-            Screens.Add(new StoreUI(Remote));
-            Screens.Add(new UploadWorldUI(Remote));
+            void AddUI<T>() where T : UIScreen
+            {
+                Screens.Add(Activator.CreateInstance(typeof(T), Remote) as T);
+            }
         }
 
         public override void OnGUI()
@@ -81,6 +87,9 @@ namespace ShareMod
             {
                 foreach (var item in Screens)
                 {
+                    if (item.RequireMainMenu && !ModUtilities.IsOnMainMenu)
+                        continue;
+
                     item.Draw();
                 }
             }
