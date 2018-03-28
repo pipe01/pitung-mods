@@ -305,7 +305,7 @@ namespace ShareMod.UI
 
                 BeginVertical();
                 {
-                    Label($"<size=16>{world.World.Title}</size>");
+                    Label($"<b><size=16>{world.World.Title}</size></b>");
 
                     Label("by " + authorName, WorldInfoStyle);
                     Label($"{world.World.Downloads} downloads", WorldInfoStyle);
@@ -397,6 +397,8 @@ namespace ShareMod.UI
 
             LastResponse = null;
 
+            WorldStates.Clear();
+
             new Thread(() =>
             {
                 if (!PageCache.ContainsKey(CurrentPage))
@@ -413,7 +415,7 @@ namespace ShareMod.UI
 
                     return;
                 }
-
+                
                 CurrentState = State.Idle;
                 ScrollPos = Vector2.zero;
 

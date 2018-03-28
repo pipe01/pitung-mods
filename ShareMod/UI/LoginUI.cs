@@ -28,7 +28,7 @@ namespace ShareMod.UI
         
         public override void Draw()
         {
-            if (Remote.User.IsLoggedIn)
+            if (Remote.User.IsLoggedIn || !RunMainMenu.Instance.MainMenuCanvas.enabled)
                 return;
 
             string text = Remote.User.IsLoggedIn ? "Log out" : "Log in to ShareMod";
