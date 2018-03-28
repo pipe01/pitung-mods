@@ -33,6 +33,18 @@ namespace ShareMod.UI
             IsInitialized = true;
         }
 
+        public void Show()
+        {
+            Visible = true;
+            PauseMainMenuBackground();
+        }
+
+        public void Hide()
+        {
+            Visible = false;
+            ResumeMainMenuBackground();
+        }
+
         protected void SetMainMenuPlaying(bool playing)
         {
             if (playing)

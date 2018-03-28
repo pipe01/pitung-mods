@@ -27,7 +27,7 @@ namespace ShareMod.UI
             msg.ResultSet += (a, b) =>
             {
                 Shown.Remove(msg);
-                result(msg.Result);
+                result?.Invoke(msg.Result);
             };
         }
 
@@ -56,6 +56,12 @@ namespace ShareMod.UI
             Vector2 pos = new Vector2(Screen.width / 2 - size.x / 2, Screen.height / 2 - size.y / 2);
 
             GUI.Window(123123, new Rect(pos, size), Window, this.Title);
+
+            if (Event.current.type == EventType.KeyDown && Event.current.keyCode == KeyCode.Return && Options.Length == 1)
+            {
+                this.Result = 0;
+                ResultSet?.Invoke(this, null);
+            }
 
             void Window(int id)
             {

@@ -1,13 +1,11 @@
-﻿using ICSharpCode.SharpZipLib.Zip;
-using PiTung;
-using PiTung.Console;
+﻿using PiTung;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using static UnityEngine.GUILayout;
 
 namespace ShareMod.UI
@@ -28,24 +26,96 @@ namespace ShareMod.UI
             Error
         }
 
+        private class WorldItem
+        {
+            public WorldModel World { get; }
+            public UserModel Author { get; set; }
+            public WorldState State { get; set; }
+            public string TimeString { get; set; }
+
+            public WorldItem() { }
+            public WorldItem(WorldModel world, UserModel author, int? currentTime = null)
+            {
+                currentTime = currentTime ?? (int)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds;
+
+                this.World = world;
+                this.Author = author;
+                UpdateTime(currentTime.Value);
+
+                if (Directory.Exists(SavesPath + this.World.Title))
+                    this.State = WorldState.Existing;
+                else
+                    this.State = WorldState.None;
+            }
+
+            public void UpdateTime(int time)
+            {
+                this.TimeString = GetTimeString(this.World.CreatedAt, time);
+            }
+
+            private string GetTimeString(int timestamp, int currentTime)
+            {
+                int seconds = currentTime - timestamp;
+                float minutes = seconds / 60f;
+                float hours = minutes / 60;
+                float days = hours / 24;
+                float weeks = days / 7;
+
+                float value;
+                string unit = "";
+
+                if ((int)weeks > 0)
+                {
+                    value = weeks;
+                    unit = "weeek";
+                }
+                else if ((int)days > 0)
+                {
+                    value = days;
+                    unit = "day";
+                }
+                else if ((int)hours > 0)
+                {
+                    value = hours;
+                    unit = "hour";
+                }
+                else if ((int)minutes > 0)
+                {
+                    value = minutes;
+                    unit = "minute";
+                }
+                else
+                {
+                    value = seconds;
+                    unit = "second";
+                }
+
+                if ((int)value != 1)
+                {
+                    unit += "s";
+                }
+
+                return $"{(int)value} {unit} ago";
+            }
+        }
+
         public override bool RequireMainMenu => true;
 
         private Rect WorldsWindowRect = new Rect(0, 0, 500, 500);
         private Vector2 ScrollPos = new Vector2();
         private WorldModel Selected = null;
         private WorldsResponseModel LastResponse = null;
-        private IDictionary<WorldModel, WorldState> WorldStates = new Dictionary<WorldModel, WorldState>();
-        private IDictionary<WorldModel, string> WorldTimes = new Dictionary<WorldModel, string>();
+        private Dictionary<WorldModel, WorldItem> WorldStates = new Dictionary<WorldModel, WorldItem>();
         private GUIStyle EntryStyle, EntryHoverStyle, WorldInfoStyle, WorldIDStyle;
         private int CurrentPage = 0;
         private float LastTimeUpdate = 0;
-        private IDictionary<int, WorldsResponseModel> PageCache = new Dictionary<int, WorldsResponseModel>();
+        private Dictionary<int, WorldsResponseModel> PageCache = new Dictionary<int, WorldsResponseModel>();
         private State CurrentState = State.Idle;
-
+        
         private WorldModel[] Worlds => LastResponse?.Items;
+        
+        private static string SavesPath => Application.persistentDataPath + "/saves/";
 
-
-        private string SavesPath => Application.persistentDataPath + "/saves/";
 
         public StoreUI(Remote remote) : base(remote)
         {
@@ -93,7 +163,7 @@ namespace ShareMod.UI
 
         public override void Draw()
         {
-            if (!IsInitialized || !Remote.User.IsLoggedIn)
+            if (!IsInitialized || !Remote.User.IsLoggedIn || !RunMainMenu.Instance.MainMenuCanvas.enabled)
                 return;
 
             //Update world "created at" times every second
@@ -105,9 +175,9 @@ namespace ShareMod.UI
 
             if (GUI.Button(new Rect(2, 67, 150, 25), "Browse market") || (Visible && Input.GetKeyDown(KeyCode.Escape)))
             {
-                Visible = !Visible;
                 ShareMod.PlayButtonSound();
 
+                Visible = !Visible;
                 SetMainMenuPlaying(!Visible);
             }
 
@@ -129,9 +199,9 @@ namespace ShareMod.UI
                 {
                     if (LastResponse != null)
                     {
-                        foreach (var item in Worlds)
+                        foreach (var item in WorldStates)
                         {
-                            DrawWorldEntry(item);
+                            DrawWorldEntry(item.Value);
                         }
                     }
                 }
@@ -162,18 +232,26 @@ namespace ShareMod.UI
 
         private void DrawPageControls(bool enabled = true)
         {
+            bool downloading = WorldStates.Values.Any(o => o.State == WorldState.Downloading);
+            if (downloading)
+            {
+                enabled = false;
+            }
+
             FlexibleSpace();
 
             BeginVertical();
             {
                 FlexibleSpace();
 
+                GUI.enabled = !downloading;
                 if (Button("Refresh", Height(30), Width(95)))
                 {
                     ShareMod.PlayButtonSound();
 
                     Refresh(clearCache: true);
                 }
+                GUI.enabled = true;
 
                 FlexibleSpace();
             }
@@ -185,7 +263,7 @@ namespace ShareMod.UI
             {
                 FlexibleSpace();
 
-                GUI.enabled = !enabled ? false : (LastResponse?.Page ?? 0) != 0;
+                GUI.enabled = downloading ? false : !enabled ? false : (LastResponse?.Page ?? 0) != 0;
                 if (Button("Previous page", Height(30), Width(95)))
                 {
                     ShareMod.PlayButtonSound();
@@ -202,7 +280,7 @@ namespace ShareMod.UI
             {
                 FlexibleSpace();
 
-                GUI.enabled = !enabled ? false : (!LastResponse?.LastPage ?? false);
+                GUI.enabled = downloading ? false : !enabled ? false : (!LastResponse?.LastPage ?? false);
                 if (Button("Next page", Height(30), Width(95)))
                 {
                     ShareMod.PlayButtonSound();
@@ -217,33 +295,28 @@ namespace ShareMod.UI
             EndVertical();
         }
 
-        private void DrawWorldEntry(WorldModel world)
+        private void DrawWorldEntry(WorldItem world)
         {
-            string authorName = Remote.User.GetByID(world.AuthorID)?.Username;
-
-            BeginHorizontal(world == Selected ? EntryHoverStyle : EntryStyle, Height(68));
+            string authorName = world.Author.Username;
+            
+            BeginHorizontal(world.World == Selected ? EntryHoverStyle : EntryStyle, Height(68));
             {
                 Box("", Width(60), Height(60));
 
                 BeginVertical();
                 {
-                    Label($"<size=16>{world.Title}</size>");
+                    Label($"<size=16>{world.World.Title}</size>");
 
                     Label("by " + authorName, WorldInfoStyle);
-                    Label($"{world.Downloads} downloads", WorldInfoStyle);
+                    Label($"{world.World.Downloads} downloads", WorldInfoStyle);
                 }
                 EndVertical();
-
-
-                //Try to get the world state from WorldStates. If it doesn't exist, add it.
-                if (!WorldStates.TryGetValue(world, out WorldState state))
-                    state = WorldStates[world] = WorldState.None;
-
-                string btnText =
-                    state == WorldState.Downloading ? "Downloading..." :
-                    state == WorldState.Existing ? "Installed" : "Download";
                 
-                GUI.enabled = state != WorldState.Downloading && state != WorldState.Existing;
+                string btnText =
+                    world.State == WorldState.Downloading ? "Downloading..." :
+                    world.State == WorldState.Existing ? "Play" : "Download";
+                
+                GUI.enabled = world.State != WorldState.Downloading;
                 FlexibleSpace();
                 BeginVertical();
                 {
@@ -256,8 +329,17 @@ namespace ShareMod.UI
                         if (Button(btnText, Height(30), Width(95)))
                         {
                             ShareMod.PlayButtonSound();
-                            Selected = world;
-                            DownloadWorld(world);
+                            Selected = world.World;
+
+                            if (world.State == WorldState.Existing)
+                            {
+                                Hide();
+                                LoadWorld(world.World);
+                            }
+                            else
+                            {
+                                DownloadWorld(world);
+                            }
                         }
                     }
                     EndHorizontal();
@@ -267,9 +349,8 @@ namespace ShareMod.UI
 
                     GUI.enabled = false;
 
-                    if (!WorldTimes.TryGetValue(world, out var time))
-                        WorldTimes[world] = time = "";
-
+                    string time = world.TimeString;
+                    
                     Label(time, WorldIDStyle);
                     FlexibleSpace();
 
@@ -283,69 +364,25 @@ namespace ShareMod.UI
 
             if (Event.current.isMouse && horRect.Contains(Event.current.mousePosition) && Event.current.button == 0)
             {
-                Selected = world;
+                Selected = world.World;
             }
+        }
+
+        private void LoadWorld(WorldModel world)
+        {
+            SaveManager.SaveName = world.Title;
+            GameplaySaving.LoadLegacySave = false;
+            SceneManager.LoadScene("gameplay");
+            EverythingHider.HideEverything();
         }
 
         private void UpdateWorldTimes()
         {
-            WorldTimes?.Clear();
-            
-            if (Worlds == null)
-            {
-                return;
-            }
-
             int time = (int)(DateTime.UtcNow.Subtract(new DateTime(1970, 1, 1))).TotalSeconds;
-            foreach (var item in Worlds)
+            foreach (var item in WorldStates)
             {
-                WorldTimes[item] = GetTimeString(item.CreatedAt, time);
+                item.Value.UpdateTime(time);
             }
-        }
-
-        private string GetTimeString(int timestamp, int currentTime)
-        {
-            int seconds = currentTime - timestamp;
-            float minutes = seconds / 60f;
-            float hours = minutes / 60;
-            float days = hours / 24;
-            float weeks = days / 7;
-
-            float value;
-            string unit = "";
-
-            if ((int)weeks > 0)
-            {
-                value = weeks;
-                unit = "weeek";
-            }
-            else if ((int)days > 0)
-            {
-                value = days;
-                unit = "day";
-            }
-            else if ((int)hours > 0)
-            {
-                value = hours;
-                unit = "hour";
-            }
-            else if ((int)minutes > 0)
-            {
-                value = minutes;
-                unit = "minute";
-            }
-            else
-            {
-                value = seconds;
-                unit = "second";
-            }
-
-            if ((int)value != 1)
-            {
-                unit += "s";
-            }
-
-            return $"{(int)value} {unit} ago";
         }
 
         public void Refresh(bool resetPage = false, bool clearCache = false)
@@ -376,39 +413,36 @@ namespace ShareMod.UI
 
                     return;
                 }
-                else
-                {
-                    CurrentState = State.Idle;
-                }
 
+                CurrentState = State.Idle;
                 ScrollPos = Vector2.zero;
 
                 foreach (var item in Worlds)
                 {
+                    var state = new WorldItem(item, Remote.User.GetByID(item.AuthorID));
+
+                    WorldStates.Add(item, state);
+
                     if (Directory.Exists(SavesPath + item.Title))
                     {
-                        WorldStates[item] = WorldState.Existing;
+                        state.State = WorldState.Existing;
                     }
                     else
                     {
-                        WorldStates[item] = WorldState.None;
+                        state.State = WorldState.None;
                     }
-
-                    Remote.User.GetByID(item.AuthorID);
                 }
-
-                UpdateWorldTimes();
             }).Start();
         }
 
-        private void DownloadWorld(WorldModel world)
+        private void DownloadWorld(WorldItem world)
         {
-            WorldStates[world] = WorldState.Downloading;
+            world.State = WorldState.Downloading;
 
-            Remote.DownloadWorld(world.ID, o =>
+            Remote.DownloadWorld(world.World.ID, o =>
             {
-                SaveWorld(world, o);
-                WorldStates[world] = WorldState.Existing;
+                SaveWorld(world.World, o);
+                world.State = WorldState.Existing;
 
                 Console.WriteLine(o.Length);
             });

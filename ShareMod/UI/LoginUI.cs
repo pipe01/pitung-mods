@@ -12,7 +12,6 @@ namespace ShareMod.UI
         {
             Idle,
             LoggingIn,
-            LoggingOut,
             Registering
         }
 
@@ -34,7 +33,7 @@ namespace ShareMod.UI
 
             string text = Remote.User.IsLoggedIn ? "Log out" : "Log in to ShareMod";
 
-            GUI.enabled = State != EState.LoggingIn && State != EState.LoggingOut;
+            GUI.enabled = State != EState.LoggingIn;
             bool b = GUI.Button(new Rect(2, 37, 150, 25), text);
             GUI.enabled = true;
 
@@ -47,7 +46,6 @@ namespace ShareMod.UI
                     if (State != EState.LoggingIn)
                     {
                         Visible = !Visible;
-
                         SetMainMenuPlaying(!Visible);
 
                         if (Visible)
@@ -56,21 +54,16 @@ namespace ShareMod.UI
                         }
                     }
                 }
-                else if (State != EState.LoggingOut)
-                {
-                    Logout();
-                }
             }
 
             if (Visible && Input.GetKeyDown(KeyCode.Escape))
             {
-                Visible = false;
+                Hide();
             }
 
             if (Visible)
             {
-                LoginWindowRect.x = Screen.width / 2 - LoginWindowRect.width / 2;
-                LoginWindowRect.y = Screen.height / 2 - LoginWindowRect.height / 2;
+                LoginWindowRect = LoginWindowRect.CenterInScreen();
                 GUI.Window(1234, LoginWindowRect, new GUI.WindowFunction(MyWindow), "ShareMod");
             }
 
@@ -165,16 +158,6 @@ namespace ShareMod.UI
             }
         }
 
-        private void Logout()
-        {
-            new Thread(() =>
-            {
-                State = EState.LoggingOut;
-                Remote.User.Logout();
-                State = EState.Idle;
-            }).Start();
-        }
-
         private void Login(string username, string password)
         {
             new Thread(() =>
@@ -185,7 +168,7 @@ namespace ShareMod.UI
 
                 if (result == "ok")
                 {
-                    Visible = false;
+                    Hide();
                 }
                 else
                 {

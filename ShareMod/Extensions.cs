@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections;
+using UnityEngine;
 
 namespace ShareMod
 {
@@ -23,6 +24,11 @@ namespace ShareMod
                     WaitCoroutine(num);
                 }
             }
+        }
+
+        public static Rect CenterInScreen(this Rect rect)
+        {
+            return new Rect(Screen.width / 2 - rect.width / 2, Screen.height / 2 - rect.height / 2, rect.width, rect.height);
         }
     }
 }

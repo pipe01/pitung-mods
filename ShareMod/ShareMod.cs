@@ -3,9 +3,7 @@ using References;
 using ShareMod.UI;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using UnityEngine;
 
 namespace ShareMod
 {
@@ -14,13 +12,14 @@ namespace ShareMod
         public override string Name => "ShareMod";
         public override string PackageName => "me.pipe01.ShareMod";
         public override string Author => "pipe01";
-        public override Version ModVersion => new Version("1.0.0");
+        public override Version ModVersion => new Version("1.0.1");
+        public override string UpdateUrl => "http://pipe0481.heliohost.org/pitung/mods/manifest.ptm";
 
         private Remote Remote = new Remote();
 
         private IList<UIScreen> Screens = new List<UIScreen>();
         private bool Initialized = false;
-
+        
         #region Assembly loading
         static ShareMod()
         {
@@ -28,7 +27,9 @@ namespace ShareMod
         }
         private static Assembly CurrentDomain_AssemblyResolve(object sender, ResolveEventArgs args)
         {
+#if DEBUG
             Console.WriteLine("::: " + args.Name);
+#endif
 
             var dic = new Dictionary<string, byte[]>
             {
@@ -48,7 +49,7 @@ namespace ShareMod
             
             return null;
         }
-        #endregion
+#endregion
 
         public override void AfterPatch()
         {
@@ -67,6 +68,9 @@ namespace ShareMod
 
         public override void OnGUI()
         {
+            if (!ModUtilities.IsOnMainMenu)
+                return;
+
             if (!Initialized)
             {
                 Initialized = true;
