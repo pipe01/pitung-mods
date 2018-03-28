@@ -1,9 +1,11 @@
 ﻿using PiTung;
+using PiTung.Console;
 using References;
 using ShareMod.UI;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using UnityEngine;
 
 namespace ShareMod
 {
@@ -18,8 +20,9 @@ namespace ShareMod
         private Remote Remote = new Remote();
 
         private IList<UIScreen> Screens = new List<UIScreen>();
-        private bool Initialized = false;
-        
+        private bool Initialized = false, HiddenCanvases = false;
+        private IList<Canvas> WereVisible = new List<Canvas>();
+
         #region Assembly loading
         static ShareMod()
         {
@@ -82,6 +85,8 @@ namespace ShareMod
 
             if (MessageBox.Shown.Count > 0)
             {
+                SetGameUIVisible(false);
+
                 foreach (var item in MessageBox.Shown)
                 {
                     item.Draw();
@@ -89,12 +94,45 @@ namespace ShareMod
             }
             else
             {
+                SetGameUIVisible(true);
+
                 foreach (var item in Screens)
                 {
                     if (item.RequireMainMenu && !ModUtilities.IsOnMainMenu)
                         continue;
 
                     item.Draw();
+                }
+            }
+        }
+        
+        public void SetGameUIVisible(bool visible)
+        {
+            if (HiddenCanvases == visible)
+                return;
+            HiddenCanvases = visible;
+            
+            var i = RunMainMenu.Instance;
+
+            SetVisible(i.AboutCanvas, visible);
+            SetVisible(i.DeleteGameCanvas, visible);
+            SetVisible(i.LoadGameCanvas, visible);
+            SetVisible(i.MainMenuCanvas, visible);
+            SetVisible(i.NewGameCanvas, visible);
+            SetVisible(i.OptionsCanvas, visible);
+            SetVisible(i.RenameGameCanvas, visible);
+
+            void SetVisible(Canvas v, bool vis)
+            {
+                if (v.enabled && !vis)
+                {
+                    WereVisible.Add(v);
+                    v.enabled = false;
+                }
+                else if (vis && WereVisible.Contains(v))
+                {
+                    WereVisible.Remove(v);
+                    v.enabled = true;
                 }
             }
         }

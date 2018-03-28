@@ -87,7 +87,6 @@
     </Compile>
     <Compile Include="Remote.cs" />
     <Compile Include="RemoteUser.cs" />
-    <Compile Include="SafeDictionary.cs" />
     <Compile Include="ShareMod.cs" />
     <Compile Include="SimpleJSON.cs" />
     <Compile Include="UI\AccountUI.cs" />

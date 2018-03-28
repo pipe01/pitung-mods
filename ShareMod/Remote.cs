@@ -23,7 +23,8 @@ namespace ShareMod
         }
 
 #if DEBUG
-        public const string Endpoint = "http://localhost/pitung/share/v1";
+        //public const string Endpoint = "http://localhost/pitung/share/v1";
+        public const string Endpoint = "https://www.pipe0481.heliohost.org/pitung/share/v1";
 #else
         public const string Endpoint = "https://www.pipe0481.heliohost.org/pitung/share/v1";
 #endif
@@ -71,18 +72,39 @@ namespace ShareMod
 
             client.QueryString = form;
 
+            string response;
+
             try
             {
                 byte[] result = client.UploadFile(Endpoint + "/world", "world");
 
-                string resp = Encoding.UTF8.GetString(result);
+                response = Encoding.UTF8.GetString(result);
 
-                return SimpleJson.DeserializeObject<WorldModel>(resp, new MySerializationStrategy());
+            }
+            catch (WebException ex)
+            {
+#if DEBUG
+                Console.WriteLine("!!Exception at MakeRequest: " + ex);
+#endif
+
+                if (ex.Response == null)
+
+                {
+                    return null;
+                }
+
+                response = new StreamReader(ex.Response.GetResponseStream()).ReadToEnd();
+
+#if DEBUG
+                Console.WriteLine("Response: " + response);
+#endif
             }
             finally
             {
                 File.Delete("world");
             }
+
+            return SimpleJson.DeserializeObject<WorldModel>(response, new MySerializationStrategy());
         }
 
         #region HTTP Stuff

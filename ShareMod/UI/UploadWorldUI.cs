@@ -4,12 +4,15 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using UnityEngine;
 
 namespace ShareMod.UI
 {
     internal class UploadWorldUI : LoginUI
     {
+        private bool Uploading = false;
+
         public UploadWorldUI(Remote remote) : base(remote)
         {
         }
@@ -19,7 +22,7 @@ namespace ShareMod.UI
             if (!(RunMainMenu.Instance.LoadGameCanvas?.enabled ?? false) || !Remote.User.IsLoggedIn)
                 return;
 
-            GUI.enabled = LoadGameMenu.Instance.SelectedSaveFile != null;
+            GUI.enabled = LoadGameMenu.Instance.SelectedSaveFile != null && !Uploading;
             if (GUI.Button(new Rect(2, 37, 150, 55), "Upload world"))
             {
                 ShareMod.PlayButtonSound();
@@ -30,18 +33,25 @@ namespace ShareMod.UI
 
         private void UploadWorld(string folderPath)
         {
-            byte[] b = Zipper.CompressFolder(folderPath);
-
-            var result = Remote.UploadWorld(b, Path.GetFileName(folderPath));
-
-            if (result.Error == null)
+            new Thread(() =>
             {
-                MessageBox.Show("Your world has been uploaded!", "Success");
-            }
-            else
-            {
-                MessageBox.Show("Error while uploading world: " + result.Error, "Error");
-            }
+                Uploading = true;
+
+                byte[] b = Zipper.CompressFolder(folderPath);
+
+                var result = Remote.UploadWorld(b, Path.GetFileName(folderPath));
+
+                Uploading = false;
+
+                if (result.Error == null)
+                {
+                    MessageBox.Show("Your world has been uploaded!", "Success");
+                }
+                else
+                {
+                    MessageBox.Show("Error while uploading world: " + result.Error, "Error");
+                }
+            }).Start();
         }
     }
 }
