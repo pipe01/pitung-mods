@@ -4,11 +4,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{F13ABCE4-8C67-4E5B-99EE-F2F979AD9F44}</ProjectGuid>
+    <ProjectGuid>{083A0EF7-8808-4143-BC41-10D9487370A1}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>RateEr</RootNamespace>
-    <AssemblyName>RateEr</AssemblyName>
+    <RootNamespace>WirelessMod</RootNamespace>
+    <AssemblyName>WirelessMod</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
@@ -30,19 +30,11 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
-  <PropertyGroup>
-    <RunPostBuildEvent>OnOutputUpdated</RunPostBuildEvent>
-  </PropertyGroup>
   <ItemGroup>
-    <Reference Include="0Harmony">
-      <HintPath>..\PiTung Bootstrap\lib\0Harmony.dll</HintPath>
+    <Reference Include="Assembly-CSharp">
+      <HintPath>..\..\TUNG Console\PiTung Bootstrap\lib\Assembly-CSharp.dll</HintPath>
     </Reference>
-    <Reference Include="Assembly-CSharp, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\TUNG Console\PiTung Bootstrap\bin\Debug\Assembly-CSharp.dll</HintPath>
-    </Reference>
-    <Reference Include="PiTung, Version=1.6.1.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="PiTung">
       <HintPath>..\..\TUNG Console\PiTung Bootstrap\bin\Debug\PiTung.dll</HintPath>
     </Reference>
     <Reference Include="System" />
@@ -50,15 +42,24 @@
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Data" />
-    <Reference Include="UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null" />
+    <Reference Include="System.Xml" />
+    <Reference Include="UnityEngine.CoreModule">
+      <HintPath>..\..\TUNG Console\PiTung Bootstrap\lib\UnityEngine.CoreModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.IMGUIModule">
+      <HintPath>..\..\TUNG Console\PiTung Bootstrap\lib\UnityEngine.IMGUIModule.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="MyMod.cs" />
+    <Compile Include="NetworkComponent.cs" />
+    <Compile Include="Radio.cs" />
+    <Compile Include="Receiver.cs" />
+    <Compile Include="Transmitter.cs" />
+    <Compile Include="WirelessMod.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>copy "$(TargetPath)" "$(SolutionDir)output\$(ConfigurationName)\$(TargetFileName)"
-copy "$(TargetPath)" "C:\Users\Pipe\Downloads\The Ultimate Nerd Game\mods\$(TargetFileName)"</PostBuildEvent>
+    <PostBuildEvent>copy "$(TargetPath)" "C:\Users\Pipe\Downloads\The Ultimate Nerd Game\mods\$(TargetFileName)"</PostBuildEvent>
   </PropertyGroup>
 </Project>

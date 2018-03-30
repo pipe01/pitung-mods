@@ -17,6 +17,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShareMod", "ShareMod\ShareM
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Testing", "Testing\Testing.csproj", "{7A72AD13-FD9A-4334-98AD-AFDBCA0F7A85}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CustomComponents", "CustomComponents\CustomComponents.csproj", "{8A374F91-B8A4-4C2C-A315-2F4848FF0169}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WirelessMod", "WirelessMod\WirelessMod.csproj", "{083A0EF7-8808-4143-BC41-10D9487370A1}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +55,14 @@ Global
 		{7A72AD13-FD9A-4334-98AD-AFDBCA0F7A85}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7A72AD13-FD9A-4334-98AD-AFDBCA0F7A85}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7A72AD13-FD9A-4334-98AD-AFDBCA0F7A85}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8A374F91-B8A4-4C2C-A315-2F4848FF0169}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8A374F91-B8A4-4C2C-A315-2F4848FF0169}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8A374F91-B8A4-4C2C-A315-2F4848FF0169}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8A374F91-B8A4-4C2C-A315-2F4848FF0169}.Release|Any CPU.Build.0 = Release|Any CPU
+		{083A0EF7-8808-4143-BC41-10D9487370A1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{083A0EF7-8808-4143-BC41-10D9487370A1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{083A0EF7-8808-4143-BC41-10D9487370A1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{083A0EF7-8808-4143-BC41-10D9487370A1}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

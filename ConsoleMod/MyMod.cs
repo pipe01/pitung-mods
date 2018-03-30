@@ -15,7 +15,7 @@ namespace ConsoleMod
         public override string Name => "Update rate-er";
         public override string PackageName => "me.pipe01.RateEr";
         public override string Author => "pipe01";
-        public override Version ModVersion => new Version(1, 1, 2);
+        public override Version ModVersion => new Version("1.2.0");
         public override bool Hotloadable => true;
         public override string UpdateUrl => "http://pipe0481.heliohost.org/pitung/mods/manifest.ptm";
         

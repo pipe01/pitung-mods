@@ -14,7 +14,7 @@ namespace ShareMod
         public override string Name => "ShareMod";
         public override string PackageName => "me.pipe01.ShareMod";
         public override string Author => "pipe01";
-        public override Version ModVersion => new Version("1.0.3");
+        public override Version ModVersion => new Version("1.0.4");
         public override string UpdateUrl => "http://pipe0481.heliohost.org/pitung/mods/manifest.ptm";
 
         private Remote Remote = new Remote();

@@ -23,8 +23,7 @@ namespace ShareMod
         }
 
 #if DEBUG
-        //public const string Endpoint = "http://localhost/pitung/share/v1";
-        public const string Endpoint = "https://www.pipe0481.heliohost.org/pitung/share/v1";
+        public const string Endpoint = "http://localhost/pitung/share/v1";
 #else
         public const string Endpoint = "https://www.pipe0481.heliohost.org/pitung/share/v1";
 #endif

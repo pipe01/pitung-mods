@@ -11,6 +11,12 @@ namespace ShareMod.UI
 {
     internal class UploadWorldUI : LoginUI
     {
+        private enum EState
+        {
+            Idle,
+
+        }
+
         private bool Uploading = false;
 
         public UploadWorldUI(Remote remote) : base(remote)
