@@ -12,7 +12,7 @@ namespace WirelessMod
         public override string Name => "WirelessMod";
         public override string PackageName => "me.pipe01.WirelessMod";
         public override string Author => "pipe01";
-        public override Version ModVersion => new Version("1.0.0");
+        public override Version ModVersion => new Version("1.0.1");
         public override string UpdateUrl => "http://pipe0481.heliohost.org/pitung/mods/manifest.ptm";
         
         public override void BeforePatch()
