@@ -34,7 +34,7 @@ namespace TestMod
 
         void Awake()
         {
-            this.gameObject.tag = "interactable";
+            this.gameObject.tag = "Interactable";
         }
 
         void OnGUI()
