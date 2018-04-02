@@ -21,7 +21,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CustomComponents", "CustomC
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WirelessMod", "WirelessMod\WirelessMod.csproj", "{083A0EF7-8808-4143-BC41-10D9487370A1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ThroughInverter", "ThroughInverter\ThroughInverter.csproj", "{A3FA1C6F-3D68-47A7-9C66-DD7873DD84DE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LuaMod", "LuaMod\LuaMod.csproj", "{5AFF3BAE-9377-4518-9F04-CA414D2FA162}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LittleAddons", "LittleAddons\LittleAddons.csproj", "{7E87EA2A-7926-4641-A749-B4F72455D413}"
 EndProject
 Global
@@ -66,6 +67,10 @@ Global
 		{083A0EF7-8808-4143-BC41-10D9487370A1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{083A0EF7-8808-4143-BC41-10D9487370A1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{083A0EF7-8808-4143-BC41-10D9487370A1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5AFF3BAE-9377-4518-9F04-CA414D2FA162}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5AFF3BAE-9377-4518-9F04-CA414D2FA162}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5AFF3BAE-9377-4518-9F04-CA414D2FA162}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5AFF3BAE-9377-4518-9F04-CA414D2FA162}.Release|Any CPU.Build.0 = Release|Any CPU
 		{7E87EA2A-7926-4641-A749-B4F72455D413}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{7E87EA2A-7926-4641-A749-B4F72455D413}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7E87EA2A-7926-4641-A749-B4F72455D413}.Release|Any CPU.ActiveCfg = Release|Any CPU
