@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("ThroughInverter")]
+[assembly: AssemblyTitle("LittleAddons")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("ThroughInverter")]
+[assembly: AssemblyProduct("LittleAddons")]
 [assembly: AssemblyCopyright("Copyright ©  2018")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("a3fa1c6f-3d68-47a7-9c66-dd7873dd84de")]
+[assembly: Guid("7e87ea2a-7926-4641-a749-b4f72455d413")]
 
 // Version information for an assembly consists of the following four values:
 //

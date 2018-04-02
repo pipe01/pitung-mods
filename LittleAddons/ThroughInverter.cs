@@ -1,16 +1,13 @@
-﻿using PiTung.Components;
+﻿using PiTung;
+using PiTung.Components;
 using References;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using UnityEngine;
 
 namespace ThroughInverter
 {
-    public class MyInverter : UpdateHandler
+    public class ThroughInverter : UpdateHandler
     {
-        public static void Register()
+        public static void Register(Mod mod)
         {
             var b = PrefabBuilder
                 .Custom(() =>
@@ -25,7 +22,7 @@ namespace ThroughInverter
                     return obj;
                 });
 
-            ComponentRegistry.CreateNew<MyInverter>(MyMod.Instance, "throughinverter", "Through Inverter", b);
+            ComponentRegistry.CreateNew<ThroughInverter>(mod, "throughinverter", "Through Inverter", b);
         }
 
         protected override void CircuitLogicUpdate()
