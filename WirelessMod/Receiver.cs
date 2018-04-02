@@ -13,7 +13,7 @@ namespace TestMod
                 .WithColor(new Color(0.7f, 0.7f, 1))
                 .WithComponent<InteractNetwork>();
 
-            ComponentRegistry.CreateNew<Receiver>("receiver", "Receiver", prefab);
+            ComponentRegistry.CreateNew<Receiver>(WirelessMod.WirelessMod.Instance, "receiver", "Receiver", prefab);
         }
 
         void Start()

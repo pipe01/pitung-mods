@@ -15,6 +15,13 @@ namespace WirelessMod
         public override Version ModVersion => new Version("1.0.1");
         public override string UpdateUrl => "http://pipe0481.heliohost.org/pitung/mods/manifest.ptm";
         
+        public static WirelessMod Instance { get; private set; }
+
+        public WirelessMod()
+        {
+            Instance = this;
+        }
+
         public override void BeforePatch()
         {
             Receiver.Register();
