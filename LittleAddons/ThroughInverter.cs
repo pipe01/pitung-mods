@@ -3,7 +3,7 @@ using PiTung.Components;
 using References;
 using UnityEngine;
 
-namespace ThroughInverter
+namespace LittleAddons
 {
     public class ThroughInverter : UpdateHandler
     {

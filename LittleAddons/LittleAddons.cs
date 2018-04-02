@@ -3,7 +3,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using ThroughInverter;
 
 namespace LittleAddons
 {
@@ -13,10 +12,12 @@ namespace LittleAddons
         public override string PackageName => "me.pipe01.LittleAddons";
         public override string Author => "pipe01";
         public override Version ModVersion => new Version("1.0.0");
+        public override string UpdateUrl => "http://pipe0481.heliohost.org/pitung/mods/manifest.ptm";
 
         public override void BeforePatch()
         {
-            ThroughInverter.ThroughInverter.Register(this);
+            ThroughInverter.Register(this);
+            KeyButton.Register(this);
         }
     }
 }
