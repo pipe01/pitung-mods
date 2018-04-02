@@ -2,15 +2,9 @@
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.IO;
-using System.Linq;
 using System.Net;
-using System.Net.Security;
-using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading;
-using System.Web.Management;
-using UnityEngine;
-using UnityEngine.Networking;
 
 namespace ShareMod
 {
@@ -104,6 +98,16 @@ namespace ShareMod
             }
 
             return SimpleJson.DeserializeObject<WorldModel>(response, new MySerializationStrategy());
+        }
+
+        public string DeleteWorld(int worldId)
+        {
+            var r = MakeRequest<Model>($"/world/{worldId}/delete", HttpMethod.Post, new Dictionary<string, object>
+            {
+                ["token"] = User.Token
+            });
+
+            return r.Status ?? r.Error;
         }
 
         #region HTTP Stuff

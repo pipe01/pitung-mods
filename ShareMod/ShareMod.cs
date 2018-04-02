@@ -5,6 +5,7 @@ using ShareMod.UI;
 using System;
 using System.Collections.Generic;
 using System.Reflection;
+using System.Threading;
 using UnityEngine;
 
 namespace ShareMod
@@ -16,11 +17,10 @@ namespace ShareMod
         public override string Author => "pipe01";
         public override Version ModVersion => new Version("1.0.4");
         public override string UpdateUrl => "http://pipe0481.heliohost.org/pitung/mods/manifest.ptm";
-
+        
         private Remote Remote = new Remote();
-
         private IList<UIScreen> Screens = new List<UIScreen>();
-        private bool Initialized = false, HiddenCanvases = false;
+        private bool Initialized, HiddenCanvases, CheckingFile;
         private IList<Canvas> WereVisible = new List<Canvas>();
 
         #region Assembly loading
@@ -56,13 +56,23 @@ namespace ShareMod
 
         public override void AfterPatch()
         {
-            Remote.User.TryLoginFromFile();
+            new Thread(() =>
+            {
+                CheckingFile = true;
+                Remote.User.TryLoginFromFile();
+                CheckingFile = false;
 
+                InitializeAfterCheck();
+            }).Start();
+        }
+
+        private void InitializeAfterCheck()
+        {
             AddUI<LoginUI>();
             AddUI<AccountUI>();
             AddUI<StoreUI>();
             AddUI<UploadWorldUI>();
-            
+
             void AddUI<T>() where T : UIScreen
             {
                 Screens.Add(Activator.CreateInstance(typeof(T), Remote) as T);
@@ -73,6 +83,11 @@ namespace ShareMod
         {
             if (!ModUtilities.IsOnMainMenu)
                 return;
+
+            if (CheckingFile)
+            {
+
+            }
 
             if (!Initialized)
             {

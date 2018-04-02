@@ -13,7 +13,7 @@ namespace ShareMod
     
     internal class LoginModel : Model
     {
-        public int UserID { get; set; }
+        public UserModel User { get; set; }
         
         public string Token { get; set; }
     }

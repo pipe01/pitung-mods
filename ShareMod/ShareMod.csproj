@@ -92,6 +92,7 @@
     <Compile Include="UI\AccountUI.cs" />
     <Compile Include="UI\ChangePasswordUI.cs" />
     <Compile Include="UI\LoginUI.cs" />
+    <Compile Include="UI\ManageWorldUI.cs" />
     <Compile Include="UI\MessageBox.cs" />
     <Compile Include="UI\StoreUI.cs" />
     <Compile Include="UI\UIScreen.cs" />

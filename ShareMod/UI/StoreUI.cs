@@ -1,4 +1,5 @@
 ﻿using PiTung;
+using PiTung.Console;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -111,7 +112,8 @@ namespace ShareMod.UI
         private float LastTimeUpdate = 0;
         private Dictionary<int, WorldsResponseModel> PageCache = new Dictionary<int, WorldsResponseModel>();
         private State CurrentState = State.Idle;
-        
+        private IList<ManageWorldUI> Managing = new List<ManageWorldUI>();
+
         private WorldModel[] Worlds => LastResponse?.Items;
         
         private static string SavesPath => Application.persistentDataPath + "/saves/";
@@ -326,6 +328,23 @@ namespace ShareMod.UI
                     BeginHorizontal();
                     {
                         FlexibleSpace();
+
+                        if (world.Author.ID == Remote.User.CurrentUser.ID && Button("Manage", Height(30)))
+                        {
+                            ShareMod.PlayButtonSound();
+
+                            if (!Managing.Any(o => o.World.ID == world.World.ID))
+                            {
+                                IGConsole.Log(world.World.ID);
+                                var window = new ManageWorldUI(Remote, world.World);
+                                window.Init();
+                                window.Visible = true;
+
+                                Managing.Add(window);
+                            }
+                        }
+                        
+
                         if (Button(btnText, Height(30), Width(95)))
                         {
                             ShareMod.PlayButtonSound();

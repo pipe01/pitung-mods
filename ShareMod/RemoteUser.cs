@@ -15,7 +15,7 @@ namespace ShareMod
 
         private static Dictionary<int, UserModel> UserCache = new Dictionary<int, UserModel>();
 
-        public int UserID { get; private set; }
+        public UserModel CurrentUser { get; private set; }
         public string Token { get; private set; }
         public bool IsLoggedIn => Token != null;
 
@@ -30,11 +30,8 @@ namespace ShareMod
             byte[] dec = Encrypt(file, IActuallyDo);
 
             this.Token = Encoding.UTF8.GetString(Convert.FromBase64String(Encoding.UTF8.GetString(dec)));
-            Console.WriteLine(this.Token);
 
-            //TODO Call /user/check and get user id
-
-            return true;
+            return CheckToken();
         }
 
         public string Login(string username, string password)
@@ -48,7 +45,7 @@ namespace ShareMod
             if (a.Error == null)
             {
                 this.Token = a.Token;
-                this.UserID = a.UserID;
+                this.CurrentUser = a.User;
 
                 StoreEncrypted(TokenFilePath, a.Token);
             }
@@ -126,6 +123,25 @@ namespace ShareMod
             }
 
             return r.Error;
+        }
+
+        public bool CheckToken()
+        {
+            var r = MakeRequest<UserModel>("/user", HttpMethod.Get, new Dictionary<string, object>
+            {
+                ["token"] = this.Token
+            });
+
+            if (r.Status == "ok")
+            {
+                this.CurrentUser = r;
+
+                return true;
+            }
+
+            this.CurrentUser = null;
+            this.Token = null;
+            return false;
         }
 
         private static void StoreEncrypted(string filePath, string str)
