@@ -55,6 +55,7 @@
   <ItemGroup>
     <Compile Include="KeyButton.cs" />
     <Compile Include="LittleAddons.cs" />
+    <Compile Include="TFlipFlop.cs" />
     <Compile Include="ThroughInverter.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

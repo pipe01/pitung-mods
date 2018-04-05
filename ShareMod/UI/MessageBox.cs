@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Security.Principal;
 using UnityEngine;
 using static UnityEngine.GUILayout;
 
@@ -43,7 +44,8 @@ namespace ShareMod.UI
                 normal = new GUIStyleState
                 {
                     textColor = Color.white
-                }
+                },
+                wordWrap = true
             };
         }
 
@@ -69,7 +71,7 @@ namespace ShareMod.UI
                 {
                     FlexibleSpace();
 
-                    Label(this.Text, Style);
+                    Label(this.Text, Style, MaxWidth(size.x));
 
                     FlexibleSpace();
 

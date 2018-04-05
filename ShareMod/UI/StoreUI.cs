@@ -161,6 +161,8 @@ namespace ShareMod.UI
             };
 
             base.Init();
+
+            IGConsole.Log("Init");
         }
 
         public override void Draw()
@@ -322,29 +324,25 @@ namespace ShareMod.UI
                 FlexibleSpace();
                 BeginVertical();
                 {
-                    //--Download button--
                     FlexibleSpace();
 
                     BeginHorizontal();
                     {
                         FlexibleSpace();
 
+                        //--Manage button--
                         if (world.Author.ID == Remote.User.CurrentUser.ID && Button("Manage", Height(30)))
                         {
                             ShareMod.PlayButtonSound();
 
                             if (!Managing.Any(o => o.World.ID == world.World.ID))
                             {
-                                IGConsole.Log(world.World.ID);
-                                var window = new ManageWorldUI(Remote, world.World);
-                                window.Init();
-                                window.Visible = true;
-
-                                Managing.Add(window);
+                                ShowManageWorld(world.World);
                             }
                         }
+                        //------------
                         
-
+                        //--Download button--
                         if (Button(btnText, Height(30), Width(95)))
                         {
                             ShareMod.PlayButtonSound();
@@ -360,11 +358,11 @@ namespace ShareMod.UI
                                 DownloadWorld(world);
                             }
                         }
+                        //------------
                     }
                     EndHorizontal();
 
                     Space(5);
-                    //------------
 
                     GUI.enabled = false;
 
@@ -385,6 +383,26 @@ namespace ShareMod.UI
             {
                 Selected = world.World;
             }
+        }
+
+        private void ShowManageWorld(WorldModel world)
+        {
+            var window = new ManageWorldUI(Remote, world);
+            window.Init();
+            window.Visible = true;
+            window.Closed += (a, b) =>
+            {
+                Managing.Remove(window);
+                ShareMod.Screens.Remove(window);
+            };
+            window.Refresh += (a, b) =>
+            {
+                PageCache.Remove(CurrentPage);
+                Refresh();
+            };
+
+            ShareMod.Screens.Add(window);
+            Managing.Add(window);
         }
 
         private void LoadWorld(WorldModel world)

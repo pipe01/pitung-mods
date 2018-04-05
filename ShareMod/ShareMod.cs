@@ -15,11 +15,12 @@ namespace ShareMod
         public override string Name => "ShareMod";
         public override string PackageName => "me.pipe01.ShareMod";
         public override string Author => "pipe01";
-        public override Version ModVersion => new Version("1.0.4");
+        public override Version ModVersion => new Version("1.0.5");
         public override string UpdateUrl => "http://pipe0481.heliohost.org/pitung/mods/manifest.ptm";
-        
+
+        internal static IList<UIScreen> Screens = new List<UIScreen>();
+
         private Remote Remote = new Remote();
-        private IList<UIScreen> Screens = new List<UIScreen>();
         private bool Initialized, HiddenCanvases, CheckingFile;
         private IList<Canvas> WereVisible = new List<Canvas>();
 

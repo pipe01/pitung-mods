@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using UnityEngine;
 using static UnityEngine.GUILayout;
 
@@ -16,13 +17,16 @@ namespace ShareMod.UI
         }
 
         public event EventHandler Closed;
+        public event EventHandler Refresh;
         public WorldModel World { get; }
 
         private Rect WindowRect = new Rect(0, 0, 200, 200);
+        private EState State;
 
         public ManageWorldUI(Remote remote, WorldModel world) : base(remote)
         {
             this.World = world;
+            this.WindowRect = new Rect(Screen.width / 2 - WindowRect.width / 2, Screen.height / 2 - WindowRect.height / 2, WindowRect.width, WindowRect.height);
         }
 
         public override void Draw()
@@ -35,9 +39,13 @@ namespace ShareMod.UI
 
         private void DrawWindow(int id)
         {
+            GUI.BringWindowToFront(id);
+
             BeginVertical();
             {
-                if (Button("Delete"))
+                GUI.enabled = State != EState.Deleting;
+
+                if (Button(State == EState.Deleting ? "Deleting..." : "Delete"))
                 {
                     ShareMod.PlayButtonSound();
 
@@ -45,7 +53,7 @@ namespace ShareMod.UI
                     {
                         if (o == 0)
                         {
-                            DeleteWorld();
+                            DeleteWorld(World);
                         }
                     }, "Yes", "No");
                 }
@@ -56,16 +64,42 @@ namespace ShareMod.UI
                 {
                     ShareMod.PlayButtonSound();
 
-                    Visible = false;
-                    Closed?.Invoke(this, EventArgs.Empty);
+                    Close();
                 }
             }
             EndVertical();
+
+            GUI.DragWindow();
         }
 
-        private void DeleteWorld()
+        private void Close()
         {
+            Visible = false;
+            Closed?.Invoke(this, EventArgs.Empty);
+        }
 
+        private void DeleteWorld(WorldModel world)
+        {
+            new Thread(() =>
+            {
+                State = EState.Deleting;
+
+                string status = Remote.DeleteWorld(world.ID);
+
+                if (status != "ok")
+                {
+                    MessageBox.Show($"An error occurred while deleting world: {status}", "Error");
+                }
+                else
+                {
+                    MessageBox.Show("World deleted successfully!", "Success");
+
+                    Refresh?.Invoke(this, EventArgs.Empty);
+                    Close();
+                }
+
+                State = EState.Idle;
+            }).Start();
         }
     }
 }

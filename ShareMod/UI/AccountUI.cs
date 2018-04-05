@@ -28,10 +28,7 @@ namespace ShareMod.UI
             WindowRect = WindowRect.CenterInScreen();
 
             PasswordUI = new ChangePasswordUI(remote);
-            PasswordUI.Done += (a, b) =>
-            {
-                State = EState.Idle;
-            };
+            PasswordUI.Done += (a, b) => State = EState.Idle;
         }
 
         public override void Init()
