@@ -1,10 +1,4 @@
-﻿using PiTung;
-using PiTung.Components;
-using References;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using PiTung.Components;
 using UnityEngine;
 using static UnityEngine.GUILayout;
 
@@ -12,15 +6,15 @@ namespace LittleAddons
 {
     public class KeyButton : UpdateHandler
     {
-        public static void Register(Mod mod)
+        public static void Register()
         {
             var b = PrefabBuilder
                 .Cube
-                .WithSide(CubeSide.Front, SideType.Output)
+                .WithIO(CubeSide.Front, SideType.Output)
                 .WithColor(Color.cyan)
                 .WithComponent<KeyInteract>();
 
-            ComponentRegistry.CreateNew<KeyButton>(mod, "keybutton", "Key Button", b);
+            ComponentRegistry.CreateNew<KeyButton>("keybutton", "Key Button", b);
         }
 
         [SaveThis]
@@ -68,6 +62,12 @@ namespace LittleAddons
                 GameplayUIManager.UIState = UIState.ChooseDisplayColor;
             }
 
+            void LateUpdate()
+            {
+                if (Visible && Input.GetKeyDown(KeyCode.Escape))
+                    Close();
+            }
+
             void OnGUI()
             {
                 if (!Visible)
@@ -98,7 +98,7 @@ namespace LittleAddons
 
                     if (Button("Done"))
                     {
-                        SoundPlayer.PlaySoundGlobal(Sounds.UIButton);
+                        LittleAddons.PlayButtonSound();
 
                         Close();
                     }

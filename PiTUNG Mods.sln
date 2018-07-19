@@ -25,6 +25,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LuaMod", "LuaMod\LuaMod.csp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LittleAddons", "LittleAddons\LittleAddons.csproj", "{7E87EA2A-7926-4641-A749-B4F72455D413}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UndoMod", "UndoMod\UndoMod.csproj", "{69B8E17D-B0EC-41D6-B1C1-41934152B4E8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -75,6 +77,10 @@ Global
 		{7E87EA2A-7926-4641-A749-B4F72455D413}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7E87EA2A-7926-4641-A749-B4F72455D413}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7E87EA2A-7926-4641-A749-B4F72455D413}.Release|Any CPU.Build.0 = Release|Any CPU
+		{69B8E17D-B0EC-41D6-B1C1-41934152B4E8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{69B8E17D-B0EC-41D6-B1C1-41934152B4E8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{69B8E17D-B0EC-41D6-B1C1-41934152B4E8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{69B8E17D-B0EC-41D6-B1C1-41934152B4E8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

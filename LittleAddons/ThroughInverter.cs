@@ -7,7 +7,7 @@ namespace LittleAddons
 {
     public class ThroughInverter : UpdateHandler
     {
-        public static void Register(Mod mod)
+        public static void Register()
         {
             var b = PrefabBuilder
                 .Custom(() =>
@@ -22,7 +22,7 @@ namespace LittleAddons
                     return obj;
                 });
 
-            ComponentRegistry.CreateNew<ThroughInverter>(mod, "throughinverter", "Through Inverter", b);
+            ComponentRegistry.CreateNew<ThroughInverter>("throughinverter", "Through Inverter", b);
         }
 
         protected override void CircuitLogicUpdate()
