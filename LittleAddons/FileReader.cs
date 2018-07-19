@@ -22,6 +22,7 @@ namespace LittleAddons
                 .WithIO(CubeSide.Left, SideType.Input, "Reset")
                 .WithIO(CubeSide.Front, SideType.Output, "Data")
                 .WithIO(CubeSide.Back, SideType.Output, "EOF")
+                .WithColor(new Color(0.8117647f, 0.2509f, 1))
                 .WithComponent<FileInteract>();
 
             ComponentRegistry.CreateNew<FileReader>("filereader", "File Reader", b);
