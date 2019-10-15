@@ -1,5 +1,4 @@
 ﻿using PiTung.Components;
-using PiTung.Mod_utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,7 +7,7 @@ using UnityEngine;
 
 namespace LittleAddons
 {
-    internal class GateOR : UpdateHandler
+    internal class GateXNOR : UpdateHandler
     {
         public static void Register()
         {
@@ -16,17 +15,15 @@ namespace LittleAddons
                 .Cube
                 .WithIO(CubeSide.Back, SideType.Input)
                 .WithIO(CubeSide.Top, SideType.Input)
-                .WithIO(CubeSide.Front, SideType.Output);
+                .WithIO(CubeSide.Front, SideType.Output)
+                .WithColor(new Color(0.2f, 0.2f, 0.5f));
 
-            if (Configuration.Get("ColoredGates", true))
-                b = b.WithColor(new Color(0.7f, 0.2f, 0.2f));
-
-            ComponentRegistry.CreateNew<GateOR>("orgate", "OR Gate", b);
+            ComponentRegistry.CreateNew<GateXNOR>("xnorgate", "XNOR Gate", b);
         }
 
         protected override void CircuitLogicUpdate()
         {
-            this.Outputs[0].On = this.Inputs[0].On || this.Inputs[1].On;
+            this.Outputs[0].On = this.Inputs[0].On == this.Inputs[1].On;
         }
     }
 }

@@ -34,6 +34,9 @@
     <Reference Include="Assembly-CSharp">
       <HintPath>..\..\TUNG Console\PiTung Bootstrap\lib\Assembly-CSharp.dll</HintPath>
     </Reference>
+    <Reference Include="Assembly-CSharp-firstpass">
+      <HintPath>..\..\..\..\..\Downloads\The Ultimate Nerd Game\The Ultimate Nerd Game_Data\Managed\Assembly-CSharp-firstpass.dll</HintPath>
+    </Reference>
     <Reference Include="PiTung">
       <HintPath>..\..\TUNG Console\PiTung Bootstrap\bin\Debug\PiTung.dll</HintPath>
     </Reference>
@@ -51,14 +54,22 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\TUNG Console\PiTung Bootstrap\lib\UnityEngine.IMGUIModule.dll</HintPath>
     </Reference>
+    <Reference Include="UnityEngine.PhysicsModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\TUNG Multiplayer\lib\UnityEngine.PhysicsModule.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="DLatch.cs" />
     <Compile Include="EdgeDetector.cs" />
     <Compile Include="FileReader.cs" />
     <Compile Include="GateAND.cs" />
+    <Compile Include="GateAND4.cs" />
+    <Compile Include="GateANDB.cs" />
     <Compile Include="GateNAND.cs" />
     <Compile Include="GateOR.cs" />
+    <Compile Include="GateXNOR.cs" />
+    <Compile Include="GateXOR.cs" />
     <Compile Include="KeyButton.cs" />
     <Compile Include="LittleAddons.cs" />
     <Compile Include="TFlipFlop.cs" />

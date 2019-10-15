@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace LittleAddons
 {
-    internal class GateOR : UpdateHandler
+    internal class GateXOR : UpdateHandler
     {
         public static void Register()
         {
@@ -19,14 +19,14 @@ namespace LittleAddons
                 .WithIO(CubeSide.Front, SideType.Output);
 
             if (Configuration.Get("ColoredGates", true))
-                b = b.WithColor(new Color(0.7f, 0.2f, 0.2f));
+                b = b.WithColor(new Color(0.2f, 0.7f, 0.2f));
 
-            ComponentRegistry.CreateNew<GateOR>("orgate", "OR Gate", b);
+            ComponentRegistry.CreateNew<GateXOR>("xorgate", "XOR Gate", b);
         }
 
         protected override void CircuitLogicUpdate()
         {
-            this.Outputs[0].On = this.Inputs[0].On || this.Inputs[1].On;
+            this.Outputs[0].On = this.Inputs[0].On != this.Inputs[1].On;
         }
     }
 }

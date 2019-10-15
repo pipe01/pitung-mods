@@ -8,20 +8,20 @@ using UnityEngine;
 
 namespace LittleAddons
 {
-    internal class GateAND : UpdateHandler
+    internal class GateANDB : UpdateHandler
     {
         public static void Register()
         {
             var b = PrefabBuilder
                 .Cube
                 .WithIO(CubeSide.Front, SideType.Output)
-                .WithIO(CubeSide.Back, SideType.Input, -0.25f, 0)
-                .WithIO(CubeSide.Back, SideType.Input, 0.25f, 0);
+                .WithIO(CubeSide.Top, SideType.Input, -0.25f, 0)
+                .WithIO(CubeSide.Top, SideType.Input, 0.25f, 0);
 
             if (Configuration.Get("ColoredGates", true))
                 b = b.WithColor(new Color(0, 0.2f, 0.7f));
-           
-            ComponentRegistry.CreateNew<GateAND>("andgate", "AND Gate", b);
+
+            ComponentRegistry.CreateNew<GateANDB>("andgateb", "AND Gate alt", b);
         }
 
         protected override void CircuitLogicUpdate()

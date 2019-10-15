@@ -1,4 +1,5 @@
 ﻿using PiTung.Components;
+using PiTung.Mod_utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,8 +15,10 @@ namespace LittleAddons
             var b = PrefabBuilder.Cube
                 .WithIO(CubeSide.Front, SideType.Output)
                 .WithIO(CubeSide.Back, SideType.Input, -0.25f, 0)
-                .WithIO(CubeSide.Back, SideType.Input, 0.25f, 0)
-                .WithColor(new Color(0.3f, 0.2f, 0.7f));
+                .WithIO(CubeSide.Back, SideType.Input, 0.25f, 0);
+
+            if (Configuration.Get("ColoredGates", true))
+                b = b.WithColor(new Color(0.3f, 0.2f, 0.7f));
 
             ComponentRegistry.CreateNew<GateNAND>("nandgate", "NAND Gate", b);
         }

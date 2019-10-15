@@ -15,8 +15,8 @@ namespace LittleAddons
             var b = PrefabBuilder
                 .Cube
                 .WithIO(CubeSide.Front, SideType.Output)
-                .WithIO(CubeSide.Top, SideType.Input)
-                .WithIO(CubeSide.Back, SideType.Input)
+                .WithIO(CubeSide.Top, SideType.Input, "Clock")
+                .WithIO(CubeSide.Back, SideType.Input, "Data")
                 .WithColor(new Color(0, 0.6f, 0));
 
             ComponentRegistry.CreateNew<DLatch>("dlatch", "D Latch", b);
